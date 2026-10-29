@@ -1,9 +1,11 @@
 "use client";
 import { createContext, useContext } from "react";
 
-const Ctx = createContext<{ whatsapp: string | null }>({ whatsapp: null });
+type Shop = { whatsapp: string | null; serverReady: boolean };
+const Ctx = createContext<Shop>({ whatsapp: null, serverReady: false });
 
-export function ShopProvider({ whatsapp, children }: { whatsapp: string | null; children: React.ReactNode }) {
-  return <Ctx.Provider value={{ whatsapp }}>{children}</Ctx.Provider>;
+/** serverReady : la clé serveur existe (commandes en base + négociation). Sinon : commande par WhatsApp. */
+export function ShopProvider({ whatsapp, serverReady, children }: Shop & { children: React.ReactNode }) {
+  return <Ctx.Provider value={{ whatsapp, serverReady }}>{children}</Ctx.Provider>;
 }
 export const useShop = () => useContext(Ctx);

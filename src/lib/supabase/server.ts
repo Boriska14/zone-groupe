@@ -1,11 +1,18 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config";
 
 export async function createClient() {
   const cookieStore = await cookies();
+  const url = SUPABASE_URL;
+  const key = SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    // Sans ces variables, createServerClient lève une exception et toute page affiche « Application error ».
+    console.error("Supabase non configuré : renseignez src/lib/config.ts (URL + clé anon).");
+  }
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url || "http://localhost:54321",
+    key || "missing-anon-key",
     {
       cookies: {
         getAll: () => cookieStore.getAll(),

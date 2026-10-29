@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { serviceClient } from "@/lib/supabase/admin";
-import { initPayment, PAYMENT_PROVIDER } from "@/lib/payment";
 
 type In = { productId: string; qty: number; negotiationId?: string };
 
@@ -13,8 +12,6 @@ export async function POST(req: Request) {
   const name = String(c.name ?? "").trim(), phone = String(c.phone ?? "").trim();
   const address = String(c.address ?? "").trim(), city = String(c.city ?? "").trim();
   if (!name || !phone || !address || !city) return NextResponse.json({ error: "Informations de livraison incomplètes." }, { status: 400 });
-  const operator = body.operator === "orange" ? "orange" : "mtn";
-  const momoPhone = String(body.momoPhone ?? phone).trim();
   const token = String(body.token ?? "");
 
   const db = serviceClient();
@@ -50,21 +47,11 @@ export async function POST(req: Request) {
 
   const { data: order, error } = await db.from("orders").insert({
     customer_name: name, phone, email: c.email || null, city, address, notes: c.notes || null,
-    total, operator, momo_phone: momoPhone, payment_provider: PAYMENT_PROVIDER,
+    total, payment_provider: "whatsapp",
   }).select("id").single();
   if (error || !order) return NextResponse.json({ error: "Création de la commande impossible." }, { status: 500 });
   await db.from("order_items").insert(lines.map((l) => ({ ...l, order_id: order.id })));
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
-  try {
-    const pay = await initPayment({
-      orderId: order.id, amount: total, customerName: name, customerEmail: c.email || null, phone: momoPhone,
-      successUrl: `${site}/commande/${order.id}`, cancelUrl: `${site}/panier`,
-    });
-    await db.from("orders").update({ payment_ref: pay.reference }).eq("id", order.id);
-    return NextResponse.json({ orderId: order.id, paymentUrl: pay.paymentUrl });
-  } catch (e) {
-    await db.from("orders").update({ status: "failed" }).eq("id", order.id);
-    return NextResponse.json({ error: "Le service de paiement est indisponible. Réessayez." }, { status: 502 });
-  }
+  // Pas de paiement en ligne pour l'instant : la commande reste « en attente », le client finalise avec le vendeur sur WhatsApp.
+  return NextResponse.json({ orderId: order.id });
 }

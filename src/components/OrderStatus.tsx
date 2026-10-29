@@ -6,7 +6,7 @@ import WhatsAppButton from "./WhatsAppButton";
 
 type O = { id: string; status: string; total: number };
 const LABEL: Record<string, string> = {
-  pending: "En attente de paiement", paid: "Paiement reçu — merci !", failed: "Paiement échoué",
+  pending: "Commande enregistrée", paid: "Paiement reçu — merci !", failed: "Paiement échoué",
   shipped: "Commande expédiée", delivered: "Commande livrée", cancelled: "Commande annulée",
 };
 
@@ -33,10 +33,10 @@ export default function OrderStatus({ id }: { id: string }) {
       <h1 className="mt-2 text-2xl font-extrabold">{LABEL[o.status] ?? o.status}</h1>
       <p className="mt-2 text-lg font-bold text-cyan-dark">{fmt(o.total)}</p>
       {o.status === "pending" && (
-        <p className="mt-3 text-sm text-slate">Validez le paiement sur votre téléphone (code PIN). Cette page se met à jour automatiquement.</p>
+        <p className="mt-3 text-sm text-slate">Écrivez au vendeur sur WhatsApp pour confirmer la commande et convenir du paiement et de la livraison.</p>
       )}
       <WhatsAppButton
-        className="btn btn-ghost mt-5 w-full"
+        className="btn btn-primary mt-5 w-full"
         message={`Bonjour Zone Groupe, je vous écris au sujet de ma commande ${o.id.slice(0, 8)} (${fmt(o.total)}).`}
       />
       <Link href="/produits" className="btn btn-ghost mt-3 w-full">Continuer mes achats</Link>

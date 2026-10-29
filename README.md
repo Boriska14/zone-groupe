@@ -31,7 +31,11 @@ npm run dev
 4. SQL Editor : `insert into admins (user_id) select id from auth.users where email = 'VOTRE_EMAIL';`
 5. Project Settings → API : copier l'URL, la clé `anon` et la clé `service_role`.
 
-## 2. Vercel
+## 2. Configuration sans variables d'environnement
+
+Si vous n'avez pas accès aux variables d'environnement Vercel : ouvrez `src/lib/config.ts` (URL + clé anon, publiques) et `src/lib/config.server.ts` (clé `service_role`, **secrète**, dépôt GitHub privé obligatoire), remplacez les `COLLER_ICI…`, enregistrez : Vercel redéploie. Les variables d'environnement, si elles existent, restent prioritaires.
+
+## 2 bis. Vercel
 
 1. Pousser le dossier sur GitHub, puis « Import Project » dans Vercel.
 2. Variables d'environnement (voir `.env.example`) :

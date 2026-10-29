@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useCart, getSessionToken } from "@/lib/cart";
 import { fmt } from "@/lib/utils";
 import WhatsAppButton from "./WhatsAppButton";
+import { useShop } from "./ShopContext";
+import { waLink } from "@/lib/whatsapp";
 
 export default function CartView() {
   const { items, total, setQty, remove, clear } = useCart();
-  const [form, setForm] = useState({ name: "", phone: "", email: "", city: "", address: "", notes: "", operator: "mtn", momoPhone: "" });
+  const { whatsapp, serverReady } = useShop();
+  const [form, setForm] = useState({ name: "", phone: "", email: "", city: "", address: "", notes: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -24,7 +27,17 @@ export default function CartView() {
 
   const pay = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true); setError("");
+    setError("");
+    if (!serverReady) {
+      // Sans clé serveur : pas de commande en base, le récapitulatif part directement au vendeur sur WhatsApp.
+      const lines = items.map((i) => `- ${i.qty} × ${i.name} (${fmt(i.price)})`).join("\n");
+      const msg = `Bonjour Zone Groupe, je souhaite commander :\n${lines}\nTotal : ${fmt(total)}\n\nNom : ${form.name}\nTéléphone : ${form.phone}\nVille : ${form.city}\nAdresse : ${form.address}${form.notes ? `\nNote : ${form.notes}` : ""}`;
+      const href = waLink(whatsapp, msg);
+      if (!href) return setError("Le numéro WhatsApp du vendeur n'est pas encore configuré.");
+      window.open(href, "_blank", "noopener");
+      return;
+    }
+    setBusy(true);
     try {
       const r = await fetch("/api/checkout", {
         method: "POST",
@@ -33,14 +46,12 @@ export default function CartView() {
           token: getSessionToken(),
           items: items.map((i) => ({ productId: i.productId, qty: i.qty, negotiationId: i.negotiationId })),
           customer: { name: form.name, phone: form.phone, email: form.email, city: form.city, address: form.address, notes: form.notes },
-          operator: form.operator,
-          momoPhone: form.momoPhone || form.phone,
         }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "Erreur");
       clear();
-      window.location.href = d.paymentUrl;
+      window.location.href = `/commande/${d.orderId}`;
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);
@@ -71,7 +82,7 @@ export default function CartView() {
       </div>
 
       <form onSubmit={pay} className="card space-y-3 p-5 md:col-span-2">
-        <h2 className="font-extrabold">Livraison & paiement</h2>
+        <h2 className="font-extrabold">Livraison</h2>
         <div><label className="label">Nom complet</label><input required className="input" value={form.name} onChange={set("name")} /></div>
         <div><label className="label">Téléphone</label><input required className="input" value={form.phone} onChange={set("phone")} placeholder="6XXXXXXXX" /></div>
         <div className="grid grid-cols-2 gap-2">
@@ -79,23 +90,13 @@ export default function CartView() {
           <div><label className="label">Email</label><input type="email" className="input" value={form.email} onChange={set("email")} /></div>
         </div>
         <div><label className="label">Adresse / quartier</label><input required className="input" value={form.address} onChange={set("address")} /></div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="label">Opérateur</label>
-            <select className="input" value={form.operator} onChange={set("operator")}>
-              <option value="mtn">MTN Mobile Money</option>
-              <option value="orange">Orange Money</option>
-            </select>
-          </div>
-          <div><label className="label">N° Mobile Money</label><input className="input" value={form.momoPhone} onChange={set("momoPhone")} placeholder="Si différent" /></div>
-        </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Redirection…" : `Payer ${fmt(total)} en Mobile Money`}</button>
-        <p className="text-center text-xs text-slate">Paiement Mobile Money sécurisé par nyole.</p>
-        <WhatsAppButton
+        <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Envoi…" : serverReady ? `Commander · ${fmt(total)}` : `Commander sur WhatsApp · ${fmt(total)}`}</button>
+        <p className="text-center text-xs text-slate">Le paiement se finalise avec le vendeur sur WhatsApp.</p>
+        {serverReady && <WhatsAppButton
           label="Une question ? Écrire au vendeur"
           message={`Bonjour Zone Groupe, j'ai une question avant de commander : ${items.map((i) => `${i.qty} × ${i.name}`).join(", ")} (total ${fmt(total)}).`}
-        />
+        />}
       </form>
     </div>
   );

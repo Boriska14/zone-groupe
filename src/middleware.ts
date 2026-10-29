@@ -1,12 +1,14 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/config";
 
 // Rafraîchit la session Supabase pour les pages admin.
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return response; // non configuré : ne pas faire planter l'admin
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),

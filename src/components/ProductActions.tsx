@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import NegotiationChat from "./NegotiationChat";
 import WhatsAppButton from "./WhatsAppButton";
+import { useShop } from "./ShopContext";
 import { fmt } from "@/lib/utils";
 
 type P = { id: string; slug: string; name: string; price: number; stock: number; image?: string; negotiable: boolean };
 
 export default function ProductActions({ product, adminAvailable }: { product: P; adminAvailable: boolean }) {
   const cart = useCart();
+  const { serverReady } = useShop();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [chat, setChat] = useState(false);
@@ -37,7 +39,7 @@ export default function ProductActions({ product, adminAvailable }: { product: P
       <WhatsAppButton
         message={() => `Bonjour Zone Groupe, je suis intéressé(e) par « ${product.name} » (${fmt(product.price)}). ${window.location.href}`}
       />
-      {product.negotiable && product.stock > 0 && (
+      {serverReady && product.negotiable && product.stock > 0 && (
         <>
           <button className="btn btn-accent w-full" onClick={() => setChat((v) => !v)}>
             💬 {chat ? "Fermer la négociation" : "Négocier le prix"}

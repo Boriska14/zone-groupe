@@ -25,7 +25,7 @@ export default async function Home() {
             L&apos;électronique au <span className="text-cyan">juste prix</span>.
           </h1>
           <p className="mt-4 text-slate">
-            Discutez le prix de chaque produit avec notre assistant ou directement avec le gérant, puis payez par MTN ou Orange Money.
+            Discutez le prix de chaque produit avec notre assistant ou directement avec le gérant, puis finalisez votre commande avec le vendeur sur WhatsApp.
           </p>
           <div className="mt-6 flex gap-3">
             <Link href="/produits" className="btn btn-accent">Voir la boutique</Link>

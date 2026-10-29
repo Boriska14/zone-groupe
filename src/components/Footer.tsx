@@ -10,7 +10,7 @@ export default function Footer({ phone, address, whatsapp }: { phone?: string; a
         </div>
         <div>
           <p className="font-semibold text-white">Paiement</p>
-          <p className="mt-2">Mobile Money uniquement (via nyole)</p>
+          <p className="mt-2">Convenu avec le vendeur sur WhatsApp</p>
         </div>
         <div>
           <p className="font-semibold text-white">Contact</p>
