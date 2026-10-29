@@ -49,7 +49,7 @@ create table if not exists settings (
 );
 insert into settings (key, value) values
   ('admin_available', 'false'::jsonb),
-  ('shop', '{"name":"Zone Groupe","phone":"","whatsapp":"","address":"Cameroun"}'::jsonb)
+  ('shop', '{"name":"Zone Groupe","phone":"+237697707229","whatsapp":"+237697707229","address":"Cameroun"}'::jsonb)
 on conflict (key) do nothing;
 
 -- ===== Négociation =====
