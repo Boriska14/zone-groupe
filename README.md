@@ -12,7 +12,8 @@ Palette : `#03045F` `#00B6DA` `#FFCAD4` `#8D9AAE` `#EAEAEA`.
   - L'accord est valable 24 h et **re-vérifié au paiement** (le prix envoyé par le navigateur est ignoré).
   - Le gérant peut reprendre la main, fixer un prix (alerte s'il est sous le plancher), clôturer ou rendre la main au bot.
 - **Admin** (`/admin`) : tableau de bord, produits (images, stock, prix, plancher), catégories, commandes (statuts), négociations en direct, disponibilité, paramètres.
-- **Paiement mobile money** via un adaptateur d'agrégateur (`src/lib/payment.ts`) + webhook signé.
+- **Paiement mobile money, nyole uniquement** (`src/lib/payment.ts`) + webhook signé. Aucun autre moyen de paiement n'est branché.
+- **Contact WhatsApp du vendeur** : bouton sur la fiche produit, le panier et la commande, pastille flottante et lien dans le pied de page. Numéro réglé dans *Admin > Paramètres* (repli : `NEXT_PUBLIC_WHATSAPP_NUMBER`). Les boutons n'apparaissent que si un numéro valide est configuré.
 
 ## Installation locale
 
@@ -35,16 +36,16 @@ npm run dev
 1. Pousser le dossier sur GitHub, puis « Import Project » dans Vercel.
 2. Variables d'environnement (voir `.env.example`) :
    `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
-   `NEXT_PUBLIC_SITE_URL`, `PAYMENT_PROVIDER`, `NYOLE_SECRET_KEY`.
+   `NEXT_PUBLIC_SITE_URL`, `NYOLE_SECRET_KEY`, `NEXT_PUBLIC_WHATSAPP_NUMBER` (optionnel).
 3. Déployer. Admin : `https://votre-site/connexion-admin`.
 
 `SUPABASE_SERVICE_ROLE_KEY` ne doit jamais avoir le préfixe `NEXT_PUBLIC_`.
 
 ## 3. Paiement mobile money — nyole
 
-Intégration faite d'après la [documentation nyole](https://nyole.com/docs/) : session de paiement, redirection vers la page nyole (MTN MoMo, Orange Money, carte), webhook signé.
+Intégration faite d'après la [documentation nyole](https://nyole.com/docs/) : session de paiement, redirection vers la page de paiement nyole, webhook signé.
 
-1. Récupérer la clé secrète nyole (`af_test_sec_…` pour tester, `af_live_sec_…` en réel) → variable `NYOLE_SECRET_KEY`, et `PAYMENT_PROVIDER=nyole`.
+1. Récupérer la clé secrète nyole (`af_test_sec_…` pour tester, `af_live_sec_…` en réel) → variable `NYOLE_SECRET_KEY`.
 2. Dans le tableau de bord nyole, déclarer l'URL de webhook : `https://VOTRE-SITE/api/payments/webhook`.
 3. Tester avec la clé `af_test_…` (paiements simulés depuis la page nyole), puis passer à la clé réelle.
 
@@ -52,7 +53,9 @@ Sécurité : la commande n'est marquée « payée » qu'après confirmation du s
 
 **Important : nyole indique que, depuis le 17 octobre 2026, les nouveaux comptes encaissent via des outils de son écosystème (LinkAfr, Griotia, Wapilot) et que la documentation API concerne les comptes plus anciens. Si votre compte est récent, confirmez avec nyole que l'API de sessions est activée pour vous.**
 
-`PAYMENT_PROVIDER=mock` : simulation locale, jamais en production.
+Il n'y a plus de mode simulation : pour tester, utilisez une clé `af_test_sec_…` (paiements simulés par nyole).
+
+**Carte bancaire :** l'API nyole n'offre aucun paramètre pour restreindre les moyens affichés sur sa page de paiement. Si la carte y apparaît, désactivez-la dans le tableau de bord nyole (page *Moyens de paiement*) ou demandez-le au support nyole.
 
 ## Limites connues
 

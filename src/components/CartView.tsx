@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart, getSessionToken } from "@/lib/cart";
 import { fmt } from "@/lib/utils";
+import WhatsAppButton from "./WhatsAppButton";
 
 export default function CartView() {
   const { items, total, setQty, remove, clear } = useCart();
@@ -89,7 +90,12 @@ export default function CartView() {
           <div><label className="label">N° Mobile Money</label><input className="input" value={form.momoPhone} onChange={set("momoPhone")} placeholder="Si différent" /></div>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Redirection…" : `Payer ${fmt(total)}`}</button>
+        <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Redirection…" : `Payer ${fmt(total)} en Mobile Money`}</button>
+        <p className="text-center text-xs text-slate">Paiement Mobile Money sécurisé par nyole.</p>
+        <WhatsAppButton
+          label="Une question ? Écrire au vendeur"
+          message={`Bonjour Zone Groupe, j'ai une question avant de commander : ${items.map((i) => `${i.qty} × ${i.name}`).join(", ")} (total ${fmt(total)}).`}
+        />
       </form>
     </div>
   );

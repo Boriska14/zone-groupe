@@ -3,6 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import NegotiationChat from "./NegotiationChat";
+import WhatsAppButton from "./WhatsAppButton";
+import { fmt } from "@/lib/utils";
 
 type P = { id: string; slug: string; name: string; price: number; stock: number; image?: string; negotiable: boolean };
 
@@ -32,6 +34,9 @@ export default function ProductActions({ product, adminAvailable }: { product: P
       {added && (
         <p className="text-sm">Ajouté. <Link href="/panier" className="font-semibold text-cyan-dark underline">Voir le panier</Link></p>
       )}
+      <WhatsAppButton
+        message={() => `Bonjour Zone Groupe, je suis intéressé(e) par « ${product.name} » (${fmt(product.price)}). ${window.location.href}`}
+      />
       {product.negotiable && product.stock > 0 && (
         <>
           <button className="btn btn-accent w-full" onClick={() => setChat((v) => !v)}>

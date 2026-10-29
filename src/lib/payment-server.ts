@@ -1,5 +1,5 @@
 import { serviceClient } from "./supabase/admin";
-import { fetchRemoteStatus, paymentProvider } from "./payment";
+import { fetchRemoteStatus } from "./payment";
 
 /** Passe la commande à "payée" UNE seule fois et décrémente le stock (idempotent). */
 export async function markPaid(orderId: string) {
@@ -20,7 +20,6 @@ export async function markPaid(orderId: string) {
 
 /** Confirme auprès de nyole (jamais sur la foi d'un corps de requête) puis met à jour la commande. */
 export async function syncOrderPayment(orderId: string) {
-  if (paymentProvider() !== "nyole") return;
   const db = serviceClient();
   const { data: o } = await db.from("orders").select("id,status,total,payment_ref").eq("id", orderId).maybeSingle();
   if (!o || o.status !== "pending" || !o.payment_ref) return;

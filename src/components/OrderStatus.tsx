@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fmt } from "@/lib/utils";
+import WhatsAppButton from "./WhatsAppButton";
 
 type O = { id: string; status: string; total: number };
 const LABEL: Record<string, string> = {
@@ -12,7 +13,6 @@ const LABEL: Record<string, string> = {
 export default function OrderStatus({ id }: { id: string }) {
   const [o, setO] = useState<O | null>(null);
   const [missing, setMissing] = useState(false);
-  const mock = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("mock");
 
   const load = async () => {
     const r = await fetch(`/api/orders/${id}`);
@@ -25,8 +25,6 @@ export default function OrderStatus({ id }: { id: string }) {
     return () => clearInterval(t);
   }, [id, o?.status]);
 
-  const simulate = async () => { await fetch(`/api/orders/${id}`, { method: "POST" }); load(); };
-
   if (missing) return <p className="text-center text-slate">Commande introuvable.</p>;
   if (!o) return <p className="text-center text-slate">Chargement…</p>;
   return (
@@ -37,10 +35,11 @@ export default function OrderStatus({ id }: { id: string }) {
       {o.status === "pending" && (
         <p className="mt-3 text-sm text-slate">Validez le paiement sur votre téléphone (code PIN). Cette page se met à jour automatiquement.</p>
       )}
-      {o.status === "pending" && mock && (
-        <button onClick={simulate} className="btn btn-accent mt-5">Simuler le paiement (mode test)</button>
-      )}
-      <Link href="/produits" className="btn btn-ghost mt-6">Continuer mes achats</Link>
+      <WhatsAppButton
+        className="btn btn-ghost mt-5 w-full"
+        message={`Bonjour Zone Groupe, je vous écris au sujet de ma commande ${o.id.slice(0, 8)} (${fmt(o.total)}).`}
+      />
+      <Link href="/produits" className="btn btn-ghost mt-3 w-full">Continuer mes achats</Link>
     </div>
   );
 }

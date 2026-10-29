@@ -12,7 +12,11 @@ export default async function Parametres() {
       <h1 className="text-2xl font-extrabold">Paramètres de la boutique</h1>
       <form action={saveShop} className="card mt-5 grid max-w-xl gap-4 p-5">
         <div><label className="label">Téléphone</label><input name="phone" defaultValue={s.phone} className="input" /></div>
-        <div><label className="label">WhatsApp</label><input name="whatsapp" defaultValue={s.whatsapp} className="input" /></div>
+        <div>
+          <label className="label">WhatsApp du vendeur</label>
+          <input name="whatsapp" defaultValue={s.whatsapp} className="input" placeholder="237690000000" />
+          <p className="mt-1 text-xs text-slate">Format international, avec ou sans « + ». Les clients cliquent dessus pour vous écrire (fiche produit, panier, commande, pied de page).</p>
+        </div>
         <div><label className="label">Adresse</label><input name="address" defaultValue={s.address} className="input" /></div>
         <div><button className="btn btn-primary">Enregistrer</button></div>
       </form>

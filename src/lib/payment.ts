@@ -1,11 +1,10 @@
 import crypto from "node:crypto";
 
 /**
- * Paiement mobile money via l'agrégateur nyole (MTN MoMo, Orange Money, carte).
+ * Paiement mobile money via nyole, et uniquement nyole (MTN MoMo, Orange Money).
  * Docs : https://nyole.com/docs/ — POST /v1/checkout/sessions, GET /v1/checkout/sessions/{id}/status,
  * webhook signé `X-Afriflow-Signature` (t=<ts>,v1=<HMAC-SHA256 hex de "<ts>.<corps brut>">).
- *
- * PAYMENT_PROVIDER = nyole | mock (mock : simulation, développement uniquement)
+ * Aucun autre moyen de paiement n'est branché : pas de mode simulation, pas d'autre agrégateur.
  */
 const NYOLE_BASE = process.env.NYOLE_API_URL || "https://app.nyole.com/api/v1";
 
@@ -20,9 +19,7 @@ export type InitInput = {
 };
 export type InitResult = { reference: string; paymentUrl: string };
 
-/** "mock" n'est le défaut qu'en développement : en production, il faut choisir explicitement. */
-export const paymentProvider = () =>
-  process.env.PAYMENT_PROVIDER || (process.env.NODE_ENV === "production" ? "none" : "mock");
+export const PAYMENT_PROVIDER = "nyole";
 
 /** Numéro camerounais -> format international (+237…) exigé par nyole. */
 export function toInternational(phone: string) {
@@ -40,12 +37,6 @@ const secret = () => {
 };
 
 export async function initPayment(input: InitInput): Promise<InitResult> {
-  const provider = paymentProvider();
-  if (provider === "mock") {
-    return { reference: `MOCK-${input.orderId}`, paymentUrl: `${input.successUrl}?mock=1` };
-  }
-  if (provider !== "nyole") throw new Error("PAYMENT_PROVIDER non configuré");
-
   const res = await fetch(`${NYOLE_BASE}/checkout/sessions`, {
     method: "POST",
     headers: {

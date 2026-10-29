@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { serviceClient } from "@/lib/supabase/admin";
-import { initPayment, paymentProvider } from "@/lib/payment";
+import { initPayment, PAYMENT_PROVIDER } from "@/lib/payment";
 
 type In = { productId: string; qty: number; negotiationId?: string };
 
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
   const { data: order, error } = await db.from("orders").insert({
     customer_name: name, phone, email: c.email || null, city, address, notes: c.notes || null,
-    total, operator, momo_phone: momoPhone, payment_provider: paymentProvider(),
+    total, operator, momo_phone: momoPhone, payment_provider: PAYMENT_PROVIDER,
   }).select("id").single();
   if (error || !order) return NextResponse.json({ error: "Création de la commande impossible." }, { status: 500 });
   await db.from("order_items").insert(lines.map((l) => ({ ...l, order_id: order.id })));
